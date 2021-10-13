@@ -2,3 +2,4 @@
 
 # Sceptre configuration
 project_code: blog
+region: us-east-1
