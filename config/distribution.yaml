@@ -1,0 +1,16 @@
+---
+
+template_path: distribution.yaml
+
+stack_tags:
+   Purpose: website
+   domain: blog.www.{{ root_domain }}
+   role: serving
+
+parameters:
+   CertificateArn: !stack_output certificate.yaml::CertificateArn
+   CloudFrontPriceClass: PriceClass_100
+   CloudFrontSecurityPolicy: TLSv1.2_2021
+   ContentBucketDomainName: !stack_output hosting.yaml::BucketDomainName
+   OriginAccessIdentity: !stack_output hosting.yaml::OriginAccessIdentity
+   RootDomain: {{ root_domain }}

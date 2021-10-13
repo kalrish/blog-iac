@@ -1,0 +1,101 @@
+---
+
+
+AWSTemplateFormatVersion: 2010-09-09
+
+
+Description: CDN for blog
+
+
+Parameters:
+
+   CertificateArn:
+      Description: ARN of the certificate.
+      Type: String
+
+   CloudFrontPriceClass:
+      Description: Price class of CloudFront distribution.
+      Type: String
+      AllowedValues:
+         - PriceClass_100
+         - PriceClass_200
+         - PriceClass_All
+
+   CloudFrontSecurityPolicy:
+      Description: Name of the CloudFront security policy to apply on HTTPS connections.
+      Type: String
+      AllowedValues:
+         - TLSv1
+         - TLSv1_2016
+         - TLSv1.1_2016
+         - TLSv1.2_2018
+         - TLSv1.2_2019
+         - TLSv1.2_2021
+
+   ContentBucketDomainName:
+      Description: Domain name of the S3 bucket that contains the website files.
+      Type: String
+
+   OriginAccessIdentity:
+      Description: ID of the origin access identity that is allowed to access the content bucket.
+      Type: String
+
+   RootDomain:
+      Description: Root domain.
+      Type: String
+
+
+Resources:
+
+   Distribution:
+      Type: AWS::CloudFront::Distribution
+      Properties:
+         DistributionConfig:
+            Aliases:
+               -
+                  Fn::Sub: blog.www.${RootDomain}
+            CustomErrorResponses:
+               -
+                  ErrorCachingMinTTL: 60
+                  ErrorCode: 403
+                  ResponseCode: 404
+                  ResponsePagePath: /404
+            DefaultCacheBehavior:
+               AllowedMethods:
+                  - GET
+                  - HEAD
+               CachedMethods:
+                  - GET
+                  - HEAD
+               CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6 # CachingOptimized
+               Compress: true
+               TargetOriginId: s3
+               ViewerProtocolPolicy: redirect-to-https
+            Enabled: true
+            HttpVersion: http2
+            IPV6Enabled: true
+            Origins:
+               -
+                  Id: s3
+                  DomainName:
+                     Ref: ContentBucketDomainName
+                  S3OriginConfig:
+                     OriginAccessIdentity:
+                        Fn::Sub: origin-access-identity/cloudfront/${OriginAccessIdentity}
+            PriceClass:
+               Ref: CloudFrontPriceClass
+            ViewerCertificate:
+               SslSupportMethod: sni-only
+               MinimumProtocolVersion: TLSv1.2_2018
+               AcmCertificateArn:
+                  Ref: CertificateArn
+
+
+Outputs:
+
+   DistributionDomainName:
+      Description: Domain name of the CloudFront distribution.
+      Value:
+         Fn::GetAtt:
+            - Distribution
+            - DomainName
