@@ -1,0 +1,12 @@
+---
+
+template_path: certificate.yaml
+
+stack_tags:
+   Purpose: website
+   domain: blog.www.{{ root_domain }}
+   role: serving
+
+parameters:
+   HostedZoneId: {{ hosted_zone_id }}
+   RootDomain: {{ root_domain }}

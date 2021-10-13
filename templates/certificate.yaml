@@ -1,0 +1,64 @@
+---
+
+
+AWSTemplateFormatVersion: 2010-09-09
+
+
+Description: SSL certificate for blog
+
+
+Parameters:
+
+   HostedZoneId:
+      Description: ID of the Route 53 hosted zone associated with the root domain.
+      Type: AWS::Route53::HostedZone::Id
+
+   RootDomain:
+      Description: Root domain.
+      Type: String
+
+
+Resources:
+
+   Certificate:
+      DependsOn:
+         - CertificateAuthorityAuthorization
+      Type: AWS::CertificateManager::Certificate
+      Properties:
+         DomainName:
+            Fn::Sub: blog.www.${RootDomain}
+         DomainValidationOptions:
+            -
+               DomainName:
+                  Fn::Sub: blog.www.${RootDomain}
+               HostedZoneId:
+                  Ref: HostedZoneId
+         ValidationMethod: DNS
+         Tags:
+            -
+               Key: Name
+               Value: blog
+
+   CertificateAuthorityAuthorization:
+      Type: AWS::Route53::RecordSet
+      Properties:
+         HostedZoneId:
+            Ref: HostedZoneId
+         Name:
+            Fn::Sub: blog.www.${RootDomain}.
+         Comment: AWS Certificate Manager
+         Type: CAA
+         ResourceRecords:
+            - 0 issue "amazon.com"
+            - 0 issue "amazonaws.com"
+            - 0 issue "amazontrust.com"
+            - 0 issue "awstrust.com"
+         TTL: '172800'
+
+
+Outputs:
+
+   CertificateArn:
+      Description: ARN of the certificate.
+      Value:
+         Ref: Certificate
