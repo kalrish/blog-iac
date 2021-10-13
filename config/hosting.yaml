@@ -1,0 +1,8 @@
+---
+
+template_path: hosting.yaml
+
+stack_tags:
+   Purpose: website
+   domain: blog.www.{{ root_domain }}
+   role: hosting

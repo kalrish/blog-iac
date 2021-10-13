@@ -1,0 +1,28 @@
+---
+
+
+AWSTemplateFormatVersion: 2010-09-09
+
+
+Description: Hosting for blog
+
+
+Resources:
+
+   Bucket:
+      Type: AWS::S3::Bucket
+      Properties:
+         AccessControl: Private
+         PublicAccessBlockConfiguration:
+            BlockPublicAcls: true
+            BlockPublicPolicy: true
+            IgnorePublicAcls: true
+            RestrictPublicBuckets: true
+
+
+Outputs:
+
+   BucketName:
+      Description: Name of the S3 bucket.
+      Value:
+         Ref: Bucket
