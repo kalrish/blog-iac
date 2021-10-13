@@ -54,6 +54,26 @@ Resources:
             Aliases:
                -
                   Fn::Sub: blog.www.${RootDomain}
+            CacheBehaviors:
+               -
+                  PathPattern: /
+                  AllowedMethods:
+                     - GET
+                     - HEAD
+                  CachePolicyId:
+                     Fn::GetAtt:
+                        - LanguageRedirectionCachePolicy
+                        - Id
+                  Compress: false
+                  FunctionAssociations:
+                     -
+                        EventType: viewer-request
+                        FunctionARN:
+                           Fn::GetAtt:
+                              - LanguageRedirectionFunction
+                              - FunctionARN
+                  TargetOriginId: s3
+                  ViewerProtocolPolicy: redirect-to-https
             CustomErrorResponses:
                -
                   ErrorCachingMinTTL: 60
@@ -89,6 +109,74 @@ Resources:
                MinimumProtocolVersion: TLSv1.2_2018
                AcmCertificateArn:
                   Ref: CertificateArn
+
+   LanguageRedirectionCachePolicy:
+      Type: AWS::CloudFront::CachePolicy
+      Properties:
+         CachePolicyConfig:
+            Comment: Caching of blog language redirection response
+            DefaultTTL: 7776000
+            MaxTTL: 31536000
+            MinTTL: 1
+            Name: blog-language_redirection
+            ParametersInCacheKeyAndForwardedToOrigin:
+               CookiesConfig:
+                  CookieBehavior: none
+               EnableAcceptEncodingBrotli: false
+               EnableAcceptEncodingGzip: false
+               HeadersConfig:
+                  HeaderBehavior: whitelist
+                  Headers:
+                     - Accept-Language
+               QueryStringsConfig:
+                  QueryStringBehavior: none
+
+   LanguageRedirectionFunction:
+      Type: AWS::CloudFront::Function
+      Properties:
+         AutoPublish: true
+         FunctionCode: |
+            function handler(event)
+            {
+               var request = event.request;
+               var headers = request.headers;
+
+               var language = 'en';
+
+               var accept_language = headers['accept-language'];
+               if ( accept_language )
+               {
+                  var country_languages = {
+                     'de': 'de',
+                     'es': 'es',
+                  };
+
+                  var country_code = accept_language.value.substring(0,2);
+                  var country_language = country_languages[country_code];
+                  if ( country_language )
+                  {
+                     language = country_language;
+                  }
+               }
+
+               var new_url = `/${language}/home`;
+
+               var response = {
+                  statusCode: 302,
+                  statusDescription: 'Found',
+                  headers: {
+                     location: {
+                        value: new_url,
+                     }
+                  },
+               };
+
+               return response;
+            }
+         FunctionConfig:
+            Comment: Language-based redirection
+            Runtime: cloudfront-js-1.0
+         Name: blog-language_redirection
 
 
 Outputs:
