@@ -1,0 +1,39 @@
+---
+
+
+AWSTemplateFormatVersion: 2010-09-09
+
+
+Description: Google site ownership verification of blog
+
+
+Parameters:
+
+   HostedZoneId:
+      Description: ID of the Route 53 hosted zone in which to create DNS records.
+      Type: AWS::Route53::HostedZone::Id
+
+   RootDomain:
+      Description: Root domain.
+      Type: String
+
+   Value:
+      Description: Ownership verification value provided by Google.
+      Type: String
+
+
+Resources:
+
+   Record:
+      Type: AWS::Route53::RecordSet
+      Properties:
+         HostedZoneId:
+            Ref: HostedZoneId
+         Name:
+            Fn::Sub: blog.www.${RootDomain}.
+         Comment: Google site ownership verification
+         Type: TXT
+         ResourceRecords:
+            -
+               Fn::Sub: '"${Value}"'
+         TTL: '172800'

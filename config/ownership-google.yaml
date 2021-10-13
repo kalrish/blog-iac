@@ -1,0 +1,12 @@
+---
+
+template_path: ownership-google.yaml
+
+stack_tags:
+   Purpose: website
+   domain: blog.www.{{ root_domain }}
+
+parameters:
+   HostedZoneId: {{ hosted_zone_id }}
+   RootDomain: {{ root_domain }}
+   Value: google-site-verification=N6pBZ4kzG6-X7XR8hYQR-hAUpjrPqoWNdJhg-uHBrZs
