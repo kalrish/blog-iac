@@ -1,0 +1,13 @@
+---
+
+template_path: dns.yaml
+
+stack_tags:
+   Purpose: website
+   domain: blog.www.{{ root_domain }}
+   role: serving
+
+parameters:
+   DistributionDomainName: !stack_output distribution.yaml::DistributionDomainName
+   HostedZoneId: {{ hosted_zone_id }}
+   RootDomain: {{ root_domain }}

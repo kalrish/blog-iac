@@ -1,0 +1,51 @@
+---
+
+
+AWSTemplateFormatVersion: 2010-09-09
+
+
+Description: Main DNS records for blog
+
+
+Parameters:
+
+   DistributionDomainName:
+      Description: Domain Name of the CloudFront distribution.
+      Type: String
+
+   HostedZoneId:
+      Description: ID of the Route 53 hosted zone in which to create DNS records.
+      Type: AWS::Route53::HostedZone::Id
+
+   RootDomain:
+      Description: Root domain.
+      Type: String
+
+
+Resources:
+
+   IPv4Record:
+      Type: AWS::Route53::RecordSet
+      Properties:
+         AliasTarget:
+            DNSName:
+               Ref: DistributionDomainName
+            HostedZoneId: Z2FDTNDATAQYW2
+         HostedZoneId:
+            Ref: HostedZoneId
+         Name:
+            Fn::Sub: blog.www.${RootDomain}.
+         Type: A
+
+   IPv6Record:
+      Type: AWS::Route53::RecordSet
+      Properties:
+         AliasTarget:
+            DNSName:
+               Ref: DistributionDomainName
+            HostedZoneId: Z2FDTNDATAQYW2
+         HostedZoneId:
+            Ref: HostedZoneId
+         Name:
+            Fn::Sub: blog.www.${RootDomain}.
+         Type: AAAA
